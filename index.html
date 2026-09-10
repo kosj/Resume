@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="고성종 — Unreal Engine·Unity 게임 개발자. 전투 시스템, 클라이언트·서버 공통 로직, 개발 도구와 빌드 자동화 경력.">
+  <meta name="theme-color" content="#203c36">
+  <title>고성종 | 게임 개발자</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#career">경력으로 바로가기</a>
+  <header class="topbar"><a href="#" class="wordmark">KO SEONGJONG</a><nav aria-label="주요 메뉴"><a href="#career">경력</a><a href="#projects">프로젝트</a><a href="#about">소개</a><button type="button" onclick="window.print()">인쇄 / PDF</button></nav></header>
+  <main>
+    <section class="intro" aria-labelledby="name">
+      <div><p class="eyebrow">GAME DEVELOPER</p><h1 id="name">고성종<span>게임의 동작부터<br>개발의 흐름까지.</span></h1><p class="lead">Unreal Engine과 Unity를 기반으로 전투 시스템과 게임 콘텐츠를 개발합니다. 클라이언트·서버 공통 로직, 개발 도구, 빌드 자동화까지 연결하며 팀의 개발 과정을 개선해 왔습니다.</p><a class="contact" href="mailto:godkosj@gmail.com">godkosj@gmail.com <span aria-hidden="true">↗</span></a></div>
+      <aside class="expertise" aria-label="핵심 역량"><p class="eyebrow">CORE EXPERTISE</p><div><b>01</b><p><strong>게임 시스템</strong><span>결정론적 전투 · 스탯 · 버프 · 동기화</span></p></div><div><b>02</b><p><strong>클라이언트 개발</strong><span>Unreal Engine · Unity · C++ · C#</span></p></div><div><b>03</b><p><strong>개발 생산성</strong><span>에디터 도구 · Jenkins · AI 협업</span></p></div></aside>
+    </section>
+    <section id="career" class="section"><div class="section-heading"><p class="eyebrow">01 / CAREER</p><h2>경력</h2></div><div class="section-body career-list">
+      <div><time>2016.11 — 현재</time><h3>NC</h3><p>게임 클라이언트 개발 · 클라이언트/서버 리드(TD) 경험</p></div>
+      <div><time>2014.12 — 2016.10</time><h3>파티게임즈</h3><p>차석 · 클라이언트/서버 리드(팀장)</p></div>
+      <div><time>2005.03 — 2014.11</time><h3>컴투스 홀딩스</h3><p>차석 · 클라이언트 리드(팀장)</p></div>
+      <div><time>2004.02 — 2005.02</time><h3>아시아어뮤즈</h3><p>사원 · 클라이언트 개발</p></div>
+    </div></section>
+    <section id="projects" class="section"><div class="section-heading"><p class="eyebrow">02 / PROJECTS</p><h2>주요 프로젝트</h2></div><div class="section-body">
+      <article class="project"><div class="project-meta"><span>NC · 클라이언트 개발 / 팀원</span><time>2024.10 — 2026.08</time></div><h3>블소 키우기 <span class="subtle">(판테라)</span></h3><p class="project-summary">서버와 클라이언트가 공유하는 결정론적 전투 기반을 만들고, 데이터 검증과 크래시 대응 과정을 도구화했습니다.</p><p class="stack">Unreal Engine 5 · C++ · C# · Jenkins · Perforce · Claude Code</p>
+        <h4>결정론적 전투·스탯 라이브러리</h4><ul><li>정수 스케일 기반 고정소수점 연산으로 스탯 계산을 구현하고, 연산자 오버로딩으로 Set/Get을 캡슐화했습니다.</li><li>전투별 고정 시드로 난수 결과가 재현되도록 구성하고 멀티스레드 환경에 대응했습니다.</li><li>서버에는 라이브러리와 C# API, 클라이언트에는 Unreal 플러그인 형태로 배포했습니다.</li></ul>
+        <h4>데이터 파이프라인·크래시 대응</h4><ul><li>CSV 데이터와 스트링 테이블을 Unreal 에셋으로 변환하는 빌드 파이프라인을 구축했습니다.</li><li>에디터 실행 및 Jenkins 패키지 빌드 시 데이터 유효성을 검증하도록 구성했습니다.</li><li>에디터·Windows용 자체 크래시 리포터를 제작했습니다. 콜스택을 Teams 워크플로로 전달하고, 덤프를 공용 폴더에 모아 미니덤프 디버깅이 가능한 환경을 구축했습니다.</li></ul>
+        <h4>콘텐츠·플랫폼·최적화</h4><ul><li>퀵매치에서 서버가 데이터 기반 전투를 실행하고 결과에 따라 승패를 처리하도록 구현했습니다.</li><li>전시 콘텐츠와 SceneCapture2D 기반 아이템 미리보기, 훈련소 DPS 측정, 장착·인벤토리를 개발했습니다.</li><li>서버 공통 로직을 사용하는 버프·디버프 동기화, 부위별 FX, 테이블 기반 상태이상 머티리얼 제어를 구현했습니다.</li><li>Windows·Android·iOS NCCR 연동 및 Actor·Niagara 이펙트의 오브젝트 풀링을 적용했습니다.</li></ul><p class="project-note">일반 대전의 서버 검증 결과를 재생하는 리플레이는 프로젝트 종료로 구현하지 못했습니다.</p>
+      </article>
+      <article class="project"><div class="project-meta"><span>NC · 클라이언트 개발</span><time>2021.06 — 2024.09</time></div><h3>미니버스 <span class="subtle">(메타버스)</span></h3><p class="project-summary">Unreal 초기 프로젝트 구성부터 멀티플레이 동기화, UI·콘텐츠, 모바일 빌드 환경까지 개발했습니다.</p><p class="stack">Unreal Engine 4–5.4 · C++ · Godot · GDScript · React · Node.js · Jenkins · Perforce · Git</p>
+        <h4>프로젝트 기반·네트워크·UI</h4><ul><li>Enhanced Input을 도입하고 미니게임별 Input Mapping Context 교체로 키 매핑을 구성했습니다.</li><li>로코모션, 카메라 줌, 데디케이티드 서버 연동과 로그인 흐름을 구현했습니다.</li><li>RPC를 활용해 프랍 상호작용 모션과 상태를 동기화했습니다.</li><li>데이터 테이블 기반 위젯 속성으로 입력 모드, 키 활성화, 이전 위젯 닫기와 다중 위젯 표시를 관리했습니다.</li></ul>
+        <h4>콘텐츠·오디오</h4><ul><li>아이템 수집·제작·강화, 장착·인벤토리 및 SceneCapture2D 기반 아이템·캐릭터 미리보기를 개발했습니다.</li><li>우편함, 방명록, 물풍선 미니게임과 프랍 HSV 색상 변경·RGB 저장, 조명 조도 조절을 구현했습니다.</li><li>사운드 프리로딩·캐싱, Sound Class별 볼륨 조절, 거리 감쇠를 구성하고 MetaSounds로 피아노 건반 36종을 구현했습니다.</li></ul>
+        <h4>최적화·개발 환경</h4><ul><li>WebBrowser 위젯을 사용하는 TV·오락기 프랍에서 EpicHelper 프로세스가 해제되지 않아 발생한 프레임 저하를 위젯 풀링과 재사용으로 개선했습니다.</li><li>Android·iOS 빌드 환경과 Jenkins 빌드 파이프라인을 구축하고 Unreal Installed Build 제작·배포를 관리했습니다.</li><li>World Partition, TTS, 딥링크를 연구하고 React 웹 페이지와 Godot WebAssembly 간 통신을 구현했습니다.</li></ul>
+      </article>
+      <article class="project"><div class="project-meta"><span>NC · 클라이언트/서버 리드(TD)</span><time>2016.11 — 2021.05</time></div><h3>스푼즈랜드 · 아라미퍼즈벤처</h3><p class="stack">Unity · C# · Java · Jenkins · Mercurial · Perforce · Wwise</p><ul><li>인게임·아웃게임 콘텐츠 및 아이소메트릭 뷰의 아웃게임 도구를 개발했습니다.</li><li>NC 플랫폼·NCGuard를 연동하고 Wwise 연동 과정에서 사운드팀과 협업했습니다.</li><li>퍼즐 레벨 도구를 관리·유지보수하고 NC TR을 경험했습니다.</li><li>Jenkins CI/CD 파이프라인을 구축했습니다.</li></ul></article>
+      <article class="project"><div class="project-meta"><span>파티게임즈 · 클라이언트/서버 리드(팀장)</span><time>2014.12 — 2016.10</time></div><h3>The Last</h3><p class="stack">Unity · C# · MongoDB · Redis · SVN · Nancy Framework</p><ul><li>초기 프로젝트와 클라이언트 프레임워크를 구성했습니다.</li><li>서버·클라이언트 공통 로직, 전투, 스킬, 맵, 전투 리플레이 및 콘텐츠를 구현했습니다.</li><li>애니메이션 타임라인에 사운드·이펙트 이벤트를 삽입하는 도구를 개발했습니다.</li><li>Nancy Framework 기반 C# 웹 서버 콘텐츠를 개발했습니다.</li></ul></article>
+      <article class="project"><div class="project-meta"><span>컴투스 홀딩스 · 클라이언트 리드(팀장)</span><time>재직 2005.03 — 2014.11</time></div><h3>제노니아 시리즈 · 캐주얼 게임</h3><p class="stack">C++ · Cocos2d-x · Java · SVN · Visual Studio</p><ul><li>제노니아2부터 온라인(MORPG)까지 클라이언트 개발을 리드하고, 결정론적 락스텝 기반 서버·클라이언트 네트워크 프레임워크를 구성했습니다.</li><li>전투, 맵, AI를 개발하고 텐센트 TR을 경험했습니다.</li><li>사내 그래픽 도구용 Java 라이브러리를 개발했습니다.</li><li>BaseballSuperStar2007 미주 출시 등 캐주얼 게임 4종을 포함한 다수 게임을 개발했습니다.</li></ul></article>
+      <article class="project"><div class="project-meta"><span>아시아어뮤즈 · 클라이언트 개발</span></div><h3>아케이드 3종 · 액션 RPG 1종</h3><p class="stack">C/C++ · Brew · Visual Studio</p><ul><li>아케이드 3종과 액션 RPG 1종을 개발·출시하고 일본 KDDI 플랫폼을 연동했습니다.</li></ul></article>
+    </div></section>
+    <section id="about" class="section"><div class="section-heading"><p class="eyebrow">03 / APPROACH</p><h2>AI와 함께하는 개발</h2></div><div class="section-body prose"><p>AI를 코드 작성에 활용하는 것에서 더 나아가, 개발 파이프라인을 개선하는 협업 도구로 사용합니다. 새로운 도구를 실제 작업에 적용하며 시스템 설계와 게임 경험에 더 집중할 수 있는 방법을 찾고 있습니다.</p><h3>AI 활용 FPS 프로토타이핑</h3><p>Unreal Engine 5.8, Claude Code, Varco-3d를 활용한 FPS 게임 제작 프로젝트를 진행했습니다. AI를 실무 흐름에 연결하며 개발자의 설계 판단과 반복 작업 사이의 역할을 탐구했습니다.</p></div></section>
+    <section class="section"><div class="section-heading"><p class="eyebrow">04 / BACKGROUND</p><h2>학력·자격·외국어</h2></div><div class="section-body background"><div><h3>컴퓨터소프트웨어 전공</h3><p>대학교 학사 · 졸업</p><p>1998.03 — 2003.02 · 학점 3.3 / 4.5</p></div><div><h3>자격증</h3><p>정보처리 · 한국산업인력공단 · 2003.08.24</p><p>SCJP · Sun Microsystems · 2006.11.12</p></div><div><h3>영어</h3><p>독해 중급 · 회화/작문 초급</p><p>TOEIC 820점 (2005년 응시)</p></div></div></section>
+  </main>
+  <footer><span>고성종 · Ko Seongjong</span><a href="mailto:godkosj@gmail.com">godkosj@gmail.com</a></footer>
+</body>
+</html>
