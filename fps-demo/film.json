@@ -1,0 +1,8 @@
+{
+  "path": "fps-demo/",
+  "mp4": "assets/fps-prototype.mp4",
+  "title": "FPS 입력부터 피격 데칼까지",
+  "length": "1:16",
+  "desc": "작동하는 별도 FPS 데모로 이동·ADS·발사·재장전, 히트 판정과 표면 법선 기반 데칼을 설명합니다. 실제 Unreal 프로젝트 녹화가 아니며 수치는 예시입니다.",
+  "tags": ["FPS", "히트스캔", "피격 판정", "데칼"]
+}

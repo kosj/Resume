@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>FPS 입력부터 피격 데칼까지 — 설명</title>
+<meta name="description" content="작동하는 별도 FPS 데모로 이동·ADS·발사·재장전, 히트 판정과 표면 법선 기반 데칼을 설명합니다. 실제 Unreal 프로젝트 녹화가 아니며 수치는 예시입니다.">
+<style>
+  /* Reading page: one 720px column, light and dark. */
+  @font-face { font-family: Pretendard; src: url(../assets/fonts/Pretendard-Variable.woff2) format("woff2"), url(assets/fonts/Pretendard-Variable.woff2) format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url(../assets/fonts/JetBrainsMono.woff2) format("woff2"), url(assets/fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }
+  :root {
+    --bg: #fbfbfd; --surface: #f1f2f7; --line: #dde0ea; --fg: #141826; --text2: #39405a; --dim: #6b7290; --accent: #6d4fd8;
+    --sans: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #070a13; --surface: #0e1424; --line: #24304a; --fg: #e8ecf4; --text2: #c3cad8; --dim: #8b95a7; --accent: #a78bfa; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #070a13; --surface: #0e1424; --line: #24304a; --fg: #e8ecf4; --text2: #c3cad8; --dim: #8b95a7; --accent: #a78bfa; color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 17px; line-height: 1.8;
+    word-break: keep-all; overflow-wrap: anywhere;
+    padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  main { max-width: 720px; margin: 0 auto; }
+  a { color: var(--accent); }
+  .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+  h1 { font-size: clamp(30px, 6vw, 42px); line-height: 1.25; letter-spacing: -.02em; margin: 12px 0 16px; text-wrap: balance; }
+  h2 { font-size: 24px; line-height: 1.4; margin: 56px 0 4px; text-wrap: balance; display: flex; gap: 12px; align-items: baseline; }
+  h2 .n { font: 600 15px/1 var(--mono); color: var(--accent); flex: none; }
+  .sub { color: var(--dim); margin: 0 0 16px; font-size: 16px; }
+  p, li { color: var(--text2); }
+  .lede { font-size: 19px; color: var(--fg); }
+  nav.tabs { display: flex; gap: 6px; margin: 0 0 28px; border-bottom: 1px solid var(--line); }
+  nav.tabs a { font: 700 15px/1 var(--sans); color: var(--dim); text-decoration: none; padding: 12px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  nav.tabs a:hover { color: var(--fg); }
+  nav.tabs a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
+  .next { margin-top: 48px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; }
+  .actions a { font: 600 14px/1 var(--sans); text-decoration: none; color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; background: var(--surface); }
+  .actions a:hover { border-color: var(--accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; font: 500 12px/1 var(--mono); color: var(--dim); }
+  .tags span { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; }
+  nav.toc { border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; margin: 32px 0 0; background: var(--surface); }
+  nav.toc ol { margin: 0; padding-left: 1.4em; } nav.toc li { color: var(--fg); }
+  nav.toc a { color: inherit; text-decoration: none; } nav.toc a:hover { color: var(--accent); }
+  .scene { font: 600 13px/1 var(--sans); }
+  code { font: 500 .88em var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+  dl.terms { display: grid; grid-template-columns: minmax(120px, max-content) minmax(0, 1fr); gap: 14px 28px; margin: 16px 0 0; }
+  dt { font-weight: 700; color: var(--fg); } dd { margin: 0; color: var(--text2); }
+  dd .src { display: block; font-size: 13px; color: var(--dim); }
+  @media (max-width: 600px) { dl.terms { grid-template-columns: minmax(0, 1fr); gap: 2px; } dd { margin-bottom: 16px; } }
+  input[type=search] { width: 100%; box-sizing: border-box; font: 500 16px var(--sans); color: var(--fg); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 16px 0 8px; }
+  footer { margin-top: 64px; font-size: 14px; color: var(--dim); }
+</style>
+</head>
+<body>
+<main>
+<nav class="tabs" aria-label="같은 주제"><a href="index.html">영상</a><a href="article.html" aria-current="page">설명</a><a href="terms.html">용어집</a></nav>
+<span class="eyebrow">1:16 · FPS · 히트스캔 · 피격 판정 · 데칼</span>
+<h1>FPS 입력부터 피격 데칼까지</h1>
+<p class="lede">FPS에서 입력·카메라·무기·충돌 판정·피해·표면 효과가 연결되는 흐름을 새로 만든 사격장으로 시연한다. AI 활용 FPS 프로토타이핑 항목을 이해하기 위한 별도 브라우저 데모이며, 실제 Unreal 프로젝트의 구현 목록이나 녹화가 아니다. 모든 수치와 충돌 규칙은 예시다.</p>
+<nav class="toc" aria-label="목차"><ol><li><a href="#ch01">이동·조준·무기</a></li><li><a href="#ch02">조준점과 실제 명중</a></li><li><a href="#ch03">피격 부위와 피해</a></li><li><a href="#ch04">표면에 데칼 투영</a></li><li><a href="#ch05">부착과 수명 관리</a></li></ol></nav>
+<section id="ch01">
+<h2><span class="n">01</span>이동·조준·무기</h2>
+<p class="sub">입력 → 카메라 → ADS → 발사·재장전 · <a class="scene" href="index.html#ch01">▶ 이 장면 보기</a></p>
+<p>WASD 입력을 카메라의 수평 방향으로 변환해 이동한다. 벽과 엄폐물의 축 정렬 경계 상자(AABB)에 각 축에 0.25m 여유를 둔 수평 충돌 범위를 검사한다. 축별로 이동을 제한하는 단순한 충돌 모델이며, 완전한 캐릭터 캡슐·경사면·계단 처리는 구현하지 않는다.</p><p>ADS 입력은 카메라 FOV를 72도에서 45도로 줄이고 무기를 화면 중앙으로 보간한다. 달리기·점프·무기 흔들림·반동을 함께 표시한다. 탄창은 10발, 발사 간격은 7틱, 재장전은 42틱이며 시뮬레이션은 30Hz다.</p>
+</section>
+<section id="ch02">
+<h2><span class="n">02</span>조준점과 실제 명중</h2>
+<p class="sub">카메라 레이와 총구 레이를 분리해 검사 · <a class="scene" href="index.html#ch02">▶ 이 장면 보기</a></p>
+<p>먼저 카메라 중심에서 레이를 쏴 조준 지점을 얻고, 총구에서 그 지점으로 다시 레이를 쏴 실제 명중 표면을 선택한다. 레이와 가장 가까운 AABB 면의 교차점·법선을 반환한다. 즉시 판정하는 히트스캔 방식이며 화면의 짧은 광선은 시각 효과다.</p><p>카메라에서 총구까지도 검사한다. 총열 구간이 엄폐물과 겹치면 해당 충돌면에 명중 처리해 뒤쪽 표적을 관통해서 맞히지 않도록 한다. 카메라가 보는 지점과 실제 총구 판정이 다를 수 있음을 보여 준다. 네트워크 서버 판정·랙 보상·안티치트는 구현하지 않는다.</p>
+</section>
+<section id="ch03">
+<h2><span class="n">03</span>피격 부위와 피해</h2>
+<p class="sub">머리·몸통 판정 → HP → 히트 피드백 · <a class="scene" href="index.html#ch03">▶ 이 장면 보기</a></p>
+<p>표적의 머리·몸통·다리에 별도의 충돌 상자를 둔다. 머리는 예시 피해 90, 나머지는 30이며 남은 HP를 넘는 피해는 남은 HP까지만 적용한다. 표시되는 판정 부위·HP·히트 마커는 실제 충돌 결과에서 나온다.</p><p>표적은 좌우로 움직이며 HP가 0이 되면 사라지고 3초 뒤 다시 나타난다. 재등장 시 해당 표적의 이전 데칼도 지운다. 캐릭터 스켈레탈 메시나 물리 에셋을 사용하는 Unreal의 구현과 동일하다는 의미는 아니다.</p>
+</section>
+<section id="ch04">
+<h2><span class="n">04</span>표면에 데칼 투영</h2>
+<p class="sub">명중 지점·법선·재질 → 부착·클리핑 · <a class="scene" href="index.html#ch04">▶ 이 장면 보기</a></p>
+<p>명중 결과의 재질에 따라 콘크리트·금속·표적 장갑용 데칼 텍스처를 고른다. 명중 지점에 표면 법선 방향으로 0.012m를 띄워 깊이 충돌을 줄이고, 명중한 AABB 면의 경계에 맞춰 데칼 사각형을 잘라 표면 밖으로 튀어나가지 않게 한다. 잘린 영역의 UV도 원래 위치를 유지한다.</p><p>이 데모는 축 정렬 면에 한정된 투영·클리핑이다. 임의의 곡면·스켈레탈 변형·여러 면을 가로지르는 투영이나 Unreal의 DBuffer Decal을 구현한 것은 아니다. 화면에서 콘크리트와 금속 판을 번갈아 쏘고 옆으로 이동해 부착 위치를 확인한다.</p>
+</section>
+<section id="ch05">
+<h2><span class="n">05</span>부착과 수명 관리</h2>
+<p class="sub">움직이는 표적에 부착 → 페이드 → 반환 · <a class="scene" href="index.html#ch05">▶ 이 장면 보기</a></p>
+<p>움직이는 표적의 데칼은 명중 당시 표적 위치를 빼서 로컬 좌표로 저장한다. 그 뒤 현재 표적 위치를 더해 그리므로 표적의 평행 이동을 따라간다. 회전·본 변형에 대한 부착은 다루지 않는다.</p><p>데칼은 최대 24개를 유지하고 생성 후 12초에 제거한다. 마지막 2초 동안 알파를 줄인다. GPU 메시 24개도 재사용한다. 표시하는 수명과 활성 개수는 데모에서 계산한 값이며 성능 개선 수치를 주장하지 않는다.</p>
+</section>
+<p class="next">이 영상에 나온 용어는 <a href="terms.html">용어집</a>에 정리했다.</p>
+<footer><a href="https://kosj.github.io/Resume/">이력서로 돌아가기</a></footer>
+</main>
+</body>
+</html>

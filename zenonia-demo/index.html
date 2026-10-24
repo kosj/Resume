@@ -1,0 +1,22 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>A* 자동 길찾기와 서버·클라 락스텝 | 고성종</title><link rel="stylesheet" href="../demo/demo.css"><script type="importmap">{"imports":{"three":"../assets/vendor/three/build/three.module.min.js","three/addons/":"../assets/vendor/three/examples/jsm/"}}</script></head>
+<body><main class="player"><header class="page-header"><a href="../index.html#zenonia-series">← 제노니아 시리즈 항목</a><span>KO SEONGJONG / PATH & LOCKSTEP</span></header><h1>A* 자동 길찾기와 서버·클라 락스텝</h1><p class="lede">장애물 탐색부터 자동 이동, 같은 틱의 입력 처리와 지연 대기까지 작동하는 별도 시연입니다.</p><div class="stage" id="stage"><canvas id="c" width="1920" height="1080" aria-label="장애물 격자에서 캐릭터가 A* 경로를 따라 이동하고 서버와 두 클라이언트의 틱별 처리를 보여 주는 영상"></canvas><button id="big" class="big" aria-label="영상 재생">▶</button></div><div class="bar"><button id="play" aria-label="재생">▶</button><input id="scrub" type="range" min="0" max="90" step="0.05" value="0" aria-label="재생 위치"><output id="time">0:00 / 1:30</output><button id="rate">1×</button></div><div class="chapters" id="chapters"></div><p class="disclosure">제노니아 경력의 기술을 설명하기 위해 새로 구현한 브라우저 데모입니다. 실제 제노니아의 소스·화면·프로토콜이 아닙니다. 서버와 두 클라이언트를 한 브라우저에서 독립 계산하고 전송 시간을 모사합니다. 실제 네트워크 접속은 하지 않으며 격자·틱·지연 수치는 예시입니다.</p><nav class="set" aria-label="같은 주제"><a href="article.html">설명 읽기</a><a href="terms.html">용어집</a><a href="../assets/zenonia-path-lockstep.mp4">MP4 영상</a></nav></main>
+<section class="notes" id="notes" hidden>
+<p class="lede">제노니아 시리즈의 A* 자동 길찾기와 서버·클라이언트 락스텝 경력을 설명하기 위한 별도 시연이다. A* 탐색은 실제 격자에서 경로를 계산하고, 서버와 두 클라이언트는 같은 입력 묶음을 각각 처리한다. 실제 프로젝트의 소스·화면·프로토콜이나 네트워크 접속을 재현한 것은 아니며 수치는 예시다.</p>
+<article data-ch="01"><p>12×9 격자에서 상하좌우 네 방향으로만 이동하며 한 칸의 비용은 1이다. A*는 시작점부터의 실제 비용 g와 목적지까지 맨해튼 거리 h를 더한 f=g+h가 가장 작은 열린 노드를 선택한다. 동점일 때도 정해진 순서를 사용한다.</p><p>이 조건에서 맨해튼 거리는 실제 남은 비용을 과대평가하지 않아 최단 경로를 찾는다. 장애물은 통과하지 않으며 이 시연의 경로 비용은 실제 계산 결과 17이다. 열린 후보·확정 노드·최종 경로는 탐색 기록에서 읽어 그린다.</p></article>
+<article data-ch="02"><p>구한 경로의 다음 칸을 차례로 따라간다. 영상 앞부분에서는 경로를 읽기 쉽게 부드럽게 그려 이동을 보여 준다. 락스텝 부분의 게임 상태는 정수 좌표이며 한 틱에 25단위(한 칸의 1/4)씩 이동한다.</p><p>유닛 경로·목표 인덱스도 시뮬레이션 상태에 포함된다. 이동 도중 장애물이 바뀌는 동적 재탐색, 회피·군중 이동은 다루지 않는다.</p></article>
+<article data-ch="03"><p>각 클라이언트가 틱 번호와 입력을 서버에 보낸다. 첫 틱에는 목적지 명령, 이후에는 명시적인 무입력(no-op)을 보낸다. 서버는 해당 틱의 두 입력을 모두 모은 뒤 고정된 순서로 묶어 각 클라이언트에 전달하고 자신의 게임 상태도 같은 묶음으로 계산한다.</p><p>입력에는 위치 스냅숏을 넣지 않는다. 각 모델은 같은 지도·규칙·입력 순서를 사용해 A*와 정수 이동을 각각 계산한다. 이는 릴레이형 락스텝의 한 가지 단순화된 구현이며 실제 제노니아 서버 구조를 단정하지 않는다.</p></article>
+<article data-ch="04"><p>예시 틱 18에서 클라이언트 B의 입력 전송을 1.5초로 늦춘다. 서버는 A의 입력만으로 그 틱을 진행하지 않는다. 입력 묶음이 오기 전에는 클라이언트도 다음 틱을 처리하지 않아 게임 이동이 멈춘다.</p><p>명령이 도착하면 같은 순서의 묶음을 처리해 이동을 이어 간다. 입력 지연·파이프라이닝·느린 클라이언트 제외·타임아웃 같은 실제 서비스 대책은 생략했다. 화면 속 캐릭터가 멈추는 것은 이 시연의 엄격한 입력 대기 규칙에 따른 결과다.</p></article>
+<article data-ch="05"><p>같은 벽시각에도 서버와 클라이언트의 최신 틱은 전송 지연으로 다를 수 있다. 영상은 세 모델이 모두 처리한 공통 틱의 전체 상태를 비교한다. 화면의 해시는 진단용 요약이며, ‘상태 일치’ 표시는 같은 틱의 전체 상태 비교 결과에서 나온다.</p><p>결정론적 입력 동기화는 같은 입력만으로 충분하지 않다. 초기 상태·지도·계산 규칙·처리 순서가 같아야 한다. 이 데모는 서로 다른 C++·Java·플랫폼 사이 결정론이나 실제 인터넷 환경을 검증하지 않는다.</p></article>
+<h2>용어 정리</h2><dl class="terms"><dt>A*</dt><dd>g+h를 기준으로 후보를 선택하는 경로 탐색 알고리즘이다.</dd><dt>g·h·f</dt><dd>g는 누적 비용, h는 남은 비용 추정치, f는 둘의 합이다.</dd><dt>맨해튼 거리</dt><dd>가로 차이와 세로 차이의 합이다. 이 데모의 네 방향·동일 비용 격자에 사용한다.</dd><dt>열린 목록</dt><dd>발견했지만 아직 확정하지 않은 탐색 후보다.</dd><dt>락스텝</dt><dd>같은 틱의 입력을 같은 순서로 처리해 각 모델이 게임 상태를 계산하는 방식이다.</dd><dt>no-op</dt><dd>해당 틱에 입력 변화가 없음을 명시하는 명령이다.</dd><dt>입력 묶음</dt><dd>한 틱에 필요한 플레이어 입력을 순서대로 모은 데이터다.</dd><dt>공통 틱</dt><dd>비교할 모든 모델이 처리를 완료한 동일 시뮬레이션 시점이다.</dd><dt>결정론</dt><dd>같은 초기 상태·데이터·입력·규칙과 처리 순서에서 같은 결과를 얻는 성질이다.</dd></dl>
+</section>
+<script type="module">
+import {mount} from './scene.mjs';
+const HEAD = [
+ [6,24,'01','A*로 경로 탐색','f = g + h · 장애물 우회 · 네 방향 이동'],
+ [24,38,'02','경로를 따라 자동 이동','탐색 결과 → 다음 경유점 → 캐릭터 이동'],
+ [38,58,'03','같은 틱의 입력 전달','클라이언트 입력 → 서버 수집 → 같은 순서로 배포'],
+ [58,74,'04','입력이 늦으면 대기','누락된 입력을 기다리고 도착 후 이동 재개'],
+ [74,90,'05','같은 틱의 상태 비교','서버·클라이언트 A·B의 공통 틱 전체 상태 비교'],
+];
+mount(HEAD);
+</script></body></html>

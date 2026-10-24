@@ -1,7 +1,7 @@
 (() => {
-  const player = document.getElementById('career-player');
-  if (!player) return;
-  const status = document.querySelector('.video-status');
+  document.querySelectorAll('video[id]').forEach(player => {
+  const section = player.closest('[data-video-section]') || player.closest('section');
+  const status = section.querySelector('.video-status');
   let pendingTime = null;
 
   const playChapter = () => {
@@ -37,6 +37,7 @@
   });
 
   document.querySelectorAll('[data-video-time]').forEach(link => {
+    if ((link.dataset.videoFor || 'career-player') !== player.id) return;
     link.addEventListener('click', event => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
@@ -46,11 +47,12 @@
         player.preload = 'auto';
         player.load();
       }
-      document.getElementById('career-video').scrollIntoView({
+      section.scrollIntoView({
         behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
         block: 'center'
       });
       player.focus({ preventScroll: true });
     });
+  });
   });
 })();

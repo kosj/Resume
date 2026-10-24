@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>A* 자동 길찾기와 서버·클라 락스텝 — 설명</title>
+<meta name="description" content="제노니아 경력을 설명하기 위한 별도 데모. A* 탐색·자동 이동과 입력 명령 기반 락스텝, 지연 시 대기를 실행합니다. 실제 제노니아 소스나 녹화가 아닙니다.">
+<style>
+  /* Reading page: one 720px column, light and dark. */
+  @font-face { font-family: Pretendard; src: url(../assets/fonts/Pretendard-Variable.woff2) format("woff2"), url(assets/fonts/Pretendard-Variable.woff2) format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url(../assets/fonts/JetBrainsMono.woff2) format("woff2"), url(assets/fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }
+  :root {
+    --bg: #fbfbfd; --surface: #f1f2f7; --line: #dde0ea; --fg: #141826; --text2: #39405a; --dim: #6b7290; --accent: #6d4fd8;
+    --sans: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #070a13; --surface: #0e1424; --line: #24304a; --fg: #e8ecf4; --text2: #c3cad8; --dim: #8b95a7; --accent: #a78bfa; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #070a13; --surface: #0e1424; --line: #24304a; --fg: #e8ecf4; --text2: #c3cad8; --dim: #8b95a7; --accent: #a78bfa; color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 17px; line-height: 1.8;
+    word-break: keep-all; overflow-wrap: anywhere;
+    padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  main { max-width: 720px; margin: 0 auto; }
+  a { color: var(--accent); }
+  .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+  h1 { font-size: clamp(30px, 6vw, 42px); line-height: 1.25; letter-spacing: -.02em; margin: 12px 0 16px; text-wrap: balance; }
+  h2 { font-size: 24px; line-height: 1.4; margin: 56px 0 4px; text-wrap: balance; display: flex; gap: 12px; align-items: baseline; }
+  h2 .n { font: 600 15px/1 var(--mono); color: var(--accent); flex: none; }
+  .sub { color: var(--dim); margin: 0 0 16px; font-size: 16px; }
+  p, li { color: var(--text2); }
+  .lede { font-size: 19px; color: var(--fg); }
+  nav.tabs { display: flex; gap: 6px; margin: 0 0 28px; border-bottom: 1px solid var(--line); }
+  nav.tabs a { font: 700 15px/1 var(--sans); color: var(--dim); text-decoration: none; padding: 12px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  nav.tabs a:hover { color: var(--fg); }
+  nav.tabs a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
+  .next { margin-top: 48px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; }
+  .actions a { font: 600 14px/1 var(--sans); text-decoration: none; color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; background: var(--surface); }
+  .actions a:hover { border-color: var(--accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; font: 500 12px/1 var(--mono); color: var(--dim); }
+  .tags span { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; }
+  nav.toc { border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; margin: 32px 0 0; background: var(--surface); }
+  nav.toc ol { margin: 0; padding-left: 1.4em; } nav.toc li { color: var(--fg); }
+  nav.toc a { color: inherit; text-decoration: none; } nav.toc a:hover { color: var(--accent); }
+  .scene { font: 600 13px/1 var(--sans); }
+  code { font: 500 .88em var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+  dl.terms { display: grid; grid-template-columns: minmax(120px, max-content) minmax(0, 1fr); gap: 14px 28px; margin: 16px 0 0; }
+  dt { font-weight: 700; color: var(--fg); } dd { margin: 0; color: var(--text2); }
+  dd .src { display: block; font-size: 13px; color: var(--dim); }
+  @media (max-width: 600px) { dl.terms { grid-template-columns: minmax(0, 1fr); gap: 2px; } dd { margin-bottom: 16px; } }
+  input[type=search] { width: 100%; box-sizing: border-box; font: 500 16px var(--sans); color: var(--fg); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 16px 0 8px; }
+  footer { margin-top: 64px; font-size: 14px; color: var(--dim); }
+</style>
+</head>
+<body>
+<main>
+<nav class="tabs" aria-label="같은 주제"><a href="index.html">영상</a><a href="article.html" aria-current="page">설명</a><a href="terms.html">용어집</a></nav>
+<span class="eyebrow">1:30 · A* · 자동 길찾기 · 락스텝 · 입력 동기화</span>
+<h1>A* 자동 길찾기와 서버·클라 락스텝</h1>
+<p class="lede">제노니아 시리즈의 A* 자동 길찾기와 서버·클라이언트 락스텝 경력을 설명하기 위한 별도 시연이다. A* 탐색은 실제 격자에서 경로를 계산하고, 서버와 두 클라이언트는 같은 입력 묶음을 각각 처리한다. 실제 프로젝트의 소스·화면·프로토콜이나 네트워크 접속을 재현한 것은 아니며 수치는 예시다.</p>
+<nav class="toc" aria-label="목차"><ol><li><a href="#ch01">A*로 경로 탐색</a></li><li><a href="#ch02">경로를 따라 자동 이동</a></li><li><a href="#ch03">같은 틱의 입력 전달</a></li><li><a href="#ch04">입력이 늦으면 대기</a></li><li><a href="#ch05">같은 틱의 상태 비교</a></li></ol></nav>
+<section id="ch01">
+<h2><span class="n">01</span>A*로 경로 탐색</h2>
+<p class="sub">f = g + h · 장애물 우회 · 네 방향 이동 · <a class="scene" href="index.html#ch01">▶ 이 장면 보기</a></p>
+<p>12×9 격자에서 상하좌우 네 방향으로만 이동하며 한 칸의 비용은 1이다. A*는 시작점부터의 실제 비용 g와 목적지까지 맨해튼 거리 h를 더한 f=g+h가 가장 작은 열린 노드를 선택한다. 동점일 때도 정해진 순서를 사용한다.</p><p>이 조건에서 맨해튼 거리는 실제 남은 비용을 과대평가하지 않아 최단 경로를 찾는다. 장애물은 통과하지 않으며 이 시연의 경로 비용은 실제 계산 결과 17이다. 열린 후보·확정 노드·최종 경로는 탐색 기록에서 읽어 그린다.</p>
+</section>
+<section id="ch02">
+<h2><span class="n">02</span>경로를 따라 자동 이동</h2>
+<p class="sub">탐색 결과 → 다음 경유점 → 캐릭터 이동 · <a class="scene" href="index.html#ch02">▶ 이 장면 보기</a></p>
+<p>구한 경로의 다음 칸을 차례로 따라간다. 영상 앞부분에서는 경로를 읽기 쉽게 부드럽게 그려 이동을 보여 준다. 락스텝 부분의 게임 상태는 정수 좌표이며 한 틱에 25단위(한 칸의 1/4)씩 이동한다.</p><p>유닛 경로·목표 인덱스도 시뮬레이션 상태에 포함된다. 이동 도중 장애물이 바뀌는 동적 재탐색, 회피·군중 이동은 다루지 않는다.</p>
+</section>
+<section id="ch03">
+<h2><span class="n">03</span>같은 틱의 입력 전달</h2>
+<p class="sub">클라이언트 입력 → 서버 수집 → 같은 순서로 배포 · <a class="scene" href="index.html#ch03">▶ 이 장면 보기</a></p>
+<p>각 클라이언트가 틱 번호와 입력을 서버에 보낸다. 첫 틱에는 목적지 명령, 이후에는 명시적인 무입력(no-op)을 보낸다. 서버는 해당 틱의 두 입력을 모두 모은 뒤 고정된 순서로 묶어 각 클라이언트에 전달하고 자신의 게임 상태도 같은 묶음으로 계산한다.</p><p>입력에는 위치 스냅숏을 넣지 않는다. 각 모델은 같은 지도·규칙·입력 순서를 사용해 A*와 정수 이동을 각각 계산한다. 이는 릴레이형 락스텝의 한 가지 단순화된 구현이며 실제 제노니아 서버 구조를 단정하지 않는다.</p>
+</section>
+<section id="ch04">
+<h2><span class="n">04</span>입력이 늦으면 대기</h2>
+<p class="sub">누락된 입력을 기다리고 도착 후 이동 재개 · <a class="scene" href="index.html#ch04">▶ 이 장면 보기</a></p>
+<p>예시 틱 18에서 클라이언트 B의 입력 전송을 1.5초로 늦춘다. 서버는 A의 입력만으로 그 틱을 진행하지 않는다. 입력 묶음이 오기 전에는 클라이언트도 다음 틱을 처리하지 않아 게임 이동이 멈춘다.</p><p>명령이 도착하면 같은 순서의 묶음을 처리해 이동을 이어 간다. 입력 지연·파이프라이닝·느린 클라이언트 제외·타임아웃 같은 실제 서비스 대책은 생략했다. 화면 속 캐릭터가 멈추는 것은 이 시연의 엄격한 입력 대기 규칙에 따른 결과다.</p>
+</section>
+<section id="ch05">
+<h2><span class="n">05</span>같은 틱의 상태 비교</h2>
+<p class="sub">서버·클라이언트 A·B의 공통 틱 전체 상태 비교 · <a class="scene" href="index.html#ch05">▶ 이 장면 보기</a></p>
+<p>같은 벽시각에도 서버와 클라이언트의 최신 틱은 전송 지연으로 다를 수 있다. 영상은 세 모델이 모두 처리한 공통 틱의 전체 상태를 비교한다. 화면의 해시는 진단용 요약이며, ‘상태 일치’ 표시는 같은 틱의 전체 상태 비교 결과에서 나온다.</p><p>결정론적 입력 동기화는 같은 입력만으로 충분하지 않다. 초기 상태·지도·계산 규칙·처리 순서가 같아야 한다. 이 데모는 서로 다른 C++·Java·플랫폼 사이 결정론이나 실제 인터넷 환경을 검증하지 않는다.</p>
+</section>
+<p class="next">이 영상에 나온 용어는 <a href="terms.html">용어집</a>에 정리했다.</p>
+<footer><a href="https://kosj.github.io/Resume/">이력서로 돌아가기</a></footer>
+</main>
+</body>
+</html>

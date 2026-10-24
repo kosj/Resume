@@ -61,3 +61,22 @@ MP4는 1920×1080·24fps H.264/yuv420p·faststart로 저장합니다.
 조정 내용은 Chromium 경로·기존 Playwright 드라이버 지원, 모듈 MIME, 단일 주제 메타데이터, FFmpeg 실패 전파입니다.
 
 Three.js와 글꼴의 출처·라이선스는 [THIRD-PARTY.md](THIRD-PARTY.md)에 있습니다.
+
+
+## 항목별 추가 영상
+
+- `fps-prototype.mp4` · 76초 · AI 활용 FPS 프로토타이핑 항목: 이동·ADS·발사·재장전, 카메라/총구 레이, 머리/몸통 판정, 재질·법선 기반 데칼과 부착·페이드.
+- `zenonia-path-lockstep.mp4` · 90초 · 제노니아 시리즈 항목: 네 방향 격자의 A* 탐색과 자동 이동, 입력 묶음 전달·지연 대기·공통 틱 상태 비교.
+
+둘 다 원본 프로젝트를 녹화한 자료가 아닌 별도 구현이다. FPS 데모는 AABB 면의 데칼 클리핑과 표적 평행 이동만 다루며 Unreal DBuffer·스켈레탈 변형은 구현하지 않는다. 락스텝은 서버·클라이언트를 한 브라우저에서 독립 계산하고 전송 시간을 모사하며 실제 접속을 하지 않는다.
+
+소스는 각각 `fps-demo/`, `zenonia-demo/`에 있다. 각 `index.html`의 HEAD·notes를 수정하고 읽기 페이지를 다시 생성한다.
+
+```bash
+node --test tools/test-technical-demos.mjs
+node tools/motion/build-articles.mjs --site https://kosj.github.io/Resume/
+node tools/motion/render.mjs fps-demo/index.html assets/fps-prototype.mp4 --fps 24 --crf 24
+node tools/motion/render.mjs zenonia-demo/index.html assets/zenonia-path-lockstep.mp4 --fps 24 --crf 24
+```
+
+포스터는 FPS 54초, 제노니아 3.4초 프레임의 JPEG이며, 각각 같은 이름의 한국어 VTT 자막을 제공한다. 플레이어별 구간 링크는 `data-video-for`로 분리한다. 인쇄 시 각 데모 주소를 표시한다.

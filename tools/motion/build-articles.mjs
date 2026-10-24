@@ -13,8 +13,8 @@ if (!fs.existsSync('index.html')) { console.error('no index.html here: run from 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const between = (s, a, b, from = 0) => { const i = s.indexOf(a, from); if (i < 0) return null; const j = s.indexOf(b, i + a.length); return j < 0 ? null : s.slice(i + a.length, j); };
 
-// Resume integration: a single topic, without replacing the resume by a gallery.
-const VIDEOS = [JSON.parse(fs.readFileSync('demo/film.json', 'utf8'))];
+// Resume integration: topic metadata, without replacing the resume by a gallery.
+const VIDEOS = ['demo', 'fps-demo', 'zenonia-demo'].map(dir => JSON.parse(fs.readFileSync(`${dir}/film.json`, 'utf8')));
 
 const FONTS = `@font-face { font-family: Pretendard; src: url(../assets/fonts/Pretendard-Variable.woff2) format("woff2"), url(assets/fonts/Pretendard-Variable.woff2) format("woff2"); font-weight: 100 900; }
   @font-face { font-family: "JetBrains Mono"; src: url(../assets/fonts/JetBrainsMono.woff2) format("woff2"), url(assets/fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }`;
