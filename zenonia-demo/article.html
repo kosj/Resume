@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
-<title>A* 자동 길찾기와 서버·클라 락스텝 — 설명</title>
-<meta name="description" content="제노니아 경력을 설명하기 위한 별도 데모. A* 탐색·자동 이동과 입력 명령 기반 락스텝, 지연 시 대기를 실행합니다. 실제 제노니아 소스나 녹화가 아닙니다.">
+<title>A* 파티 자동 전투와 서버·클라 락스텝 — 설명</title>
+<meta name="description" content="대상 탐색과 A* 이동 후 3인 AI 파티가 몬스터 24마리와 싸우는 별도 시연. 근접·광역 공격·회복과 락스텝 입력 대기를 보여 줍니다. 실제 프로젝트 녹화나 대규모 성능 검증이 아닙니다.">
 <style>
   /* Reading page: one 720px column, light and dark. */
   @font-face { font-family: Pretendard; src: url(../assets/fonts/Pretendard-Variable.woff2) format("woff2"), url(assets/fonts/Pretendard-Variable.woff2) format("woff2"); font-weight: 100 900; }
@@ -57,23 +57,23 @@
 <body>
 <main>
 <nav class="tabs" aria-label="같은 주제"><a href="index.html">영상</a><a href="article.html" aria-current="page">설명</a><a href="terms.html">용어집</a></nav>
-<span class="eyebrow">1:30 · A* · 자동 길찾기 · 락스텝 · 입력 동기화</span>
-<h1>A* 자동 길찾기와 서버·클라 락스텝</h1>
+<span class="eyebrow">1:30 · A* · 대상 탐색 · AI 파티 전투 · 락스텝</span>
+<h1>A* 파티 자동 전투와 서버·클라 락스텝</h1>
 <p class="lede">제노니아 시리즈의 A* 자동 길찾기와 서버·클라이언트 락스텝 경력을 설명하기 위한 별도 시연이다. A* 탐색은 실제 격자에서 경로를 계산하고, 서버와 두 클라이언트는 같은 입력 묶음을 각각 처리한다. 실제 프로젝트의 소스·화면·프로토콜이나 네트워크 접속을 재현한 것은 아니며 수치는 예시다.</p>
-<nav class="toc" aria-label="목차"><ol><li><a href="#ch01">A*로 경로 탐색</a></li><li><a href="#ch02">경로를 따라 자동 이동</a></li><li><a href="#ch03">같은 틱의 입력 전달</a></li><li><a href="#ch04">입력이 늦으면 대기</a></li><li><a href="#ch05">같은 틱의 상태 비교</a></li></ol></nav>
+<nav class="toc" aria-label="목차"><ol><li><a href="#ch01">대상 탐색과 A*</a></li><li><a href="#ch02">파티 자동 전투</a></li><li><a href="#ch03">같은 틱의 입력 전달</a></li><li><a href="#ch04">입력이 늦으면 대기</a></li><li><a href="#ch05">같은 틱의 상태 비교</a></li></ol></nav>
 <section id="ch01">
-<h2><span class="n">01</span>A*로 경로 탐색</h2>
-<p class="sub">f = g + h · 장애물 우회 · 네 방향 이동 · <a class="scene" href="index.html#ch01">▶ 이 장면 보기</a></p>
-<p>12×9 격자에서 상하좌우 네 방향으로만 이동하며 한 칸의 비용은 1이다. A*는 시작점부터의 실제 비용 g와 목적지까지 맨해튼 거리 h를 더한 f=g+h가 가장 작은 열린 노드를 선택한다. 동점일 때도 정해진 순서를 사용한다.</p><p>이 조건에서 맨해튼 거리는 실제 남은 비용을 과대평가하지 않아 최단 경로를 찾는다. 장애물은 통과하지 않으며 이 시연의 경로 비용은 실제 계산 결과 17이다. 열린 후보·확정 노드·최종 경로는 탐색 기록에서 읽어 그린다.</p>
+<h2><span class="n">01</span>대상 탐색과 A*</h2>
+<p class="sub">도달 가능한 적 선택 → f = g + h → 장애물 우회 · <a class="scene" href="index.html#ch01">▶ 이 장면 보기</a></p>
+<p>12×9 격자에서 상하좌우 네 방향으로만 이동하며 한 칸의 비용은 1이다. A*는 시작점부터의 실제 비용 g와 목적지까지 맨해튼 거리 h를 더한 f=g+h가 가장 작은 열린 노드를 선택한다. 동점일 때도 정해진 순서를 사용한다.</p><p>이 조건에서 맨해튼 거리는 실제 남은 비용을 과대평가하지 않아 최단 경로를 찾는다. 장애물은 통과하지 않으며 파티 전사의 첫 대상까지 경로 비용은 실제 계산 결과 15다. 열린 후보·확정 노드·최종 경로는 탐색 기록에서 읽어 그린다.</p>
 </section>
 <section id="ch02">
-<h2><span class="n">02</span>경로를 따라 자동 이동</h2>
-<p class="sub">탐색 결과 → 다음 경유점 → 캐릭터 이동 · <a class="scene" href="index.html#ch02">▶ 이 장면 보기</a></p>
-<p>구한 경로의 다음 칸을 차례로 따라간다. 영상 앞부분에서는 경로를 읽기 쉽게 부드럽게 그려 이동을 보여 준다. 락스텝 부분의 게임 상태는 정수 좌표이며 한 틱에 25단위(한 칸의 1/4)씩 이동한다.</p><p>유닛 경로·목표 인덱스도 시뮬레이션 상태에 포함된다. 이동 도중 장애물이 바뀌는 동적 재탐색, 회피·군중 이동은 다루지 않는다.</p>
+<h2><span class="n">02</span>파티 자동 전투</h2>
+<p class="sub">3인 AI 파티 · 24마리 몬스터 · 근접·광역·회복 · <a class="scene" href="index.html#ch02">▶ 이 장면 보기</a></p>
+<p>전사·마법사·지원가로 구성한 AI 파티 3명이 몬스터 24마리와 싸운다. 각자 살아 있는 적까지의 A* 경로 비용을 계산해 도달 가능한 가장 가까운 대상을 고른다. 경로를 따라 정수 좌표로 이동하고, 장애물에 가려지지 않은 사거리에서 공격한다. 대상이 쓰러지면 다음 경로를 계산한다.</p><p>전사는 근접 공격, 마법사는 대상 주변 맨해튼 반경 1.5칸의 광역 공격, 지원가는 공격과 파티 전체 손실 HP 회복을 수행한다. 몬스터도 가까운 파티원을 공격한다. 피해·회복·처치 수는 실제 시뮬레이션 상태에서 표시한다. 전투 모델은 초당 10틱, 한 틱 이동은 25단위(한 칸의 1/4)다.</p><p>이 장면은 AI로 구동하는 별도 전투 시연이며 실제 3인 네트워크 플레이나 대규모 성능 검증이 아니다. 유닛 간 충돌·군중 회피·이동하는 적의 추격은 생략한다. 뒤의 락스텝 구간은 별도의 두 유닛 이동 시나리오로 입력 전달과 대기를 설명한다.</p>
 </section>
 <section id="ch03">
 <h2><span class="n">03</span>같은 틱의 입력 전달</h2>
-<p class="sub">클라이언트 입력 → 서버 수집 → 같은 순서로 배포 · <a class="scene" href="index.html#ch03">▶ 이 장면 보기</a></p>
+<p class="sub">별도 이동 시나리오 · 입력 수집 → 배포 · <a class="scene" href="index.html#ch03">▶ 이 장면 보기</a></p>
 <p>각 클라이언트가 틱 번호와 입력을 서버에 보낸다. 첫 틱에는 목적지 명령, 이후에는 명시적인 무입력(no-op)을 보낸다. 서버는 해당 틱의 두 입력을 모두 모은 뒤 고정된 순서로 묶어 각 클라이언트에 전달하고 자신의 게임 상태도 같은 묶음으로 계산한다.</p><p>입력에는 위치 스냅숏을 넣지 않는다. 각 모델은 같은 지도·규칙·입력 순서를 사용해 A*와 정수 이동을 각각 계산한다. 이는 릴레이형 락스텝의 한 가지 단순화된 구현이며 실제 제노니아 서버 구조를 단정하지 않는다.</p>
 </section>
 <section id="ch04">

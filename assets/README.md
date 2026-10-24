@@ -90,3 +90,25 @@ node tools/motion/render.mjs zenonia-demo/index.html assets/zenonia-path-lockste
 화질 손실 없이 비디오 스트림을 복사하고 MP4 인덱스를 앞에 배치(faststart)했다.
 원본의 개발 빌드 표시와 화면 내용은 보존했다. 포스터는 영상 36초 장면이다.
 자동 재생 없이 `preload="none"`으로 제공하고 인쇄 시 이력서의 해당 위치 링크를 표시한다.
+
+
+## 파티 자동 전투 및 아이소메트릭 설명 보강
+
+제노니아 영상은 90초이며 00:06 대상·A* 탐색, 00:24–00:50 파티 자동 전투,
+00:50 별도 락스텝 이동 시나리오, 01:06 입력 지연 대기, 01:20 공통 틱 비교 순서다.
+`zenonia-demo/battle.mjs`는 전사·마법사·지원가 AI 3명과 몬스터 24마리의 별도 모형이다.
+대상을 A* 비용으로 고르고 경로 이동·사거리·시야 검사 후 공격하며,
+광역 피해·파티 회복·처치 후 재탐색을 실제 계산한다. 성능 벤치마크나 실제 네트워크 파티 플레이는 아니다.
+`node --test tools/test-party-battle.mjs`로 대상 선택·이동·전투·재현성을 검증한다.
+
+스푼즈랜드·아라미퍼즈벤처의 설명은 사용자 제공 3D·2D 혼용 경력을 반영했다.
+`isometric-demo/`는 실제 프로젝트 화면이 아닌 별도 16초 개념 시연이다.
+원근 → 직교 투영(수평45°·고도35.264° 예시) → 2D Sprite 혼용 → 깊이 가림을 보여 준다.
+
+```bash
+node tools/motion/render.mjs isometric-demo/index.html assets/isometric-view.mp4 --fps 12 --crf 23
+```
+
+`isometric-view.gif`는 같은 영상의 960×540·12fps·128색 반복 GIF다.
+기본 영상은 클릭 재생하며 GIF는 접힌 ‘GIF로 보기’를 열어 확인한다.
+움직임 감소 설정에서는 GIF 대신 정적 포스터를 표시한다. 인쇄 시에는 설명 링크를 표시한다.
