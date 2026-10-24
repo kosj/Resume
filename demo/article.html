@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>전투가 화면에 반영되기까지 — 설명</title>
+<meta name="description" content="작동하는 별도 3D 게임 데모로 전투 공통 계산, 버프 적용, 투사체 풀링을 설명합니다. 실제 프로젝트 녹화가 아니며 수치는 예시입니다.">
+<style>
+  /* Reading page: one 720px column, light and dark. */
+  @font-face { font-family: Pretendard; src: url(../assets/fonts/Pretendard-Variable.woff2) format("woff2"), url(assets/fonts/Pretendard-Variable.woff2) format("woff2"); font-weight: 100 900; }
+  @font-face { font-family: "JetBrains Mono"; src: url(../assets/fonts/JetBrainsMono.woff2) format("woff2"), url(assets/fonts/JetBrainsMono.woff2) format("woff2"); font-weight: 100 800; }
+  :root {
+    --bg: #fbfbfd; --surface: #f1f2f7; --line: #dde0ea; --fg: #141826; --text2: #39405a; --dim: #6b7290; --accent: #6d4fd8;
+    --sans: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #070a13; --surface: #0e1424; --line: #24304a; --fg: #e8ecf4; --text2: #c3cad8; --dim: #8b95a7; --accent: #a78bfa; color-scheme: dark; } }
+  :root[data-theme="dark"] { --bg: #070a13; --surface: #0e1424; --line: #24304a; --fg: #e8ecf4; --text2: #c3cad8; --dim: #8b95a7; --accent: #a78bfa; color-scheme: dark; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 17px; line-height: 1.8;
+    word-break: keep-all; overflow-wrap: anywhere;
+    padding-block: 48px 72px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  main { max-width: 720px; margin: 0 auto; }
+  a { color: var(--accent); }
+  .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .18em; color: var(--dim); text-transform: uppercase; }
+  h1 { font-size: clamp(30px, 6vw, 42px); line-height: 1.25; letter-spacing: -.02em; margin: 12px 0 16px; text-wrap: balance; }
+  h2 { font-size: 24px; line-height: 1.4; margin: 56px 0 4px; text-wrap: balance; display: flex; gap: 12px; align-items: baseline; }
+  h2 .n { font: 600 15px/1 var(--mono); color: var(--accent); flex: none; }
+  .sub { color: var(--dim); margin: 0 0 16px; font-size: 16px; }
+  p, li { color: var(--text2); }
+  .lede { font-size: 19px; color: var(--fg); }
+  nav.tabs { display: flex; gap: 6px; margin: 0 0 28px; border-bottom: 1px solid var(--line); }
+  nav.tabs a { font: 700 15px/1 var(--sans); color: var(--dim); text-decoration: none; padding: 12px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  nav.tabs a:hover { color: var(--fg); }
+  nav.tabs a[aria-current="page"] { color: var(--fg); border-bottom-color: var(--accent); }
+  .next { margin-top: 48px; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 8px; }
+  .actions a { font: 600 14px/1 var(--sans); text-decoration: none; color: var(--fg); border: 1px solid var(--line); border-radius: 999px; padding: 10px 14px; background: var(--surface); }
+  .actions a:hover { border-color: var(--accent); }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; font: 500 12px/1 var(--mono); color: var(--dim); }
+  .tags span { border: 1px solid var(--line); border-radius: 999px; padding: 6px 10px; }
+  nav.toc { border: 1px solid var(--line); border-radius: 12px; padding: 16px 20px; margin: 32px 0 0; background: var(--surface); }
+  nav.toc ol { margin: 0; padding-left: 1.4em; } nav.toc li { color: var(--fg); }
+  nav.toc a { color: inherit; text-decoration: none; } nav.toc a:hover { color: var(--accent); }
+  .scene { font: 600 13px/1 var(--sans); }
+  code { font: 500 .88em var(--mono); background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+  dl.terms { display: grid; grid-template-columns: minmax(120px, max-content) minmax(0, 1fr); gap: 14px 28px; margin: 16px 0 0; }
+  dt { font-weight: 700; color: var(--fg); } dd { margin: 0; color: var(--text2); }
+  dd .src { display: block; font-size: 13px; color: var(--dim); }
+  @media (max-width: 600px) { dl.terms { grid-template-columns: minmax(0, 1fr); gap: 2px; } dd { margin-bottom: 16px; } }
+  input[type=search] { width: 100%; box-sizing: border-box; font: 500 16px var(--sans); color: var(--fg); background: var(--surface);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; margin: 16px 0 8px; }
+  footer { margin-top: 64px; font-size: 14px; color: var(--dim); }
+</style>
+</head>
+<body>
+<main>
+<nav class="tabs" aria-label="같은 주제"><a href="index.html">영상</a><a href="article.html" aria-current="page">설명</a><a href="terms.html">용어집</a></nav>
+<span class="eyebrow">1:30 · 게임 데모 · 결정론적 계산 · 버프 · 오브젝트 풀</span>
+<h1>전투가 화면에 반영되기까지</h1>
+<p class="lede">이력서에 적힌 결정론적 전투·스탯 공통 로직, 버프와 투사체 풀링을 작은 3D 게임으로 새로 구현했다. 캐릭터를 이동시키고 공격하면 실제 시뮬레이션 상태에 따라 투사체가 날아가고, 몬스터 HP와 누적 피해가 바뀐다. 이 데모는 실제 프로젝트의 소스·녹화·성능 측정 결과가 아니며 모든 게임 수치는 예시다.</p>
+<nav class="toc" aria-label="목차"><ol><li><a href="#ch01">입력에서 피해까지</a></li><li><a href="#ch02">같은 조건, 같은 결과</a></li><li><a href="#ch03">버프를 게임에 적용</a></li><li><a href="#ch04">투사체를 다시 사용</a></li><li><a href="#ch05">같은 전투 다시 보기</a></li></ol></nav>
+<section id="ch01">
+<h2><span class="n">01</span>입력에서 피해까지</h2>
+<p class="sub">공격 입력 → 투사체 이동 → HP 반영 · <a class="scene" href="index.html#ch01">▶ 이 장면 보기</a></p>
+<p>이동 입력이 정수 좌표를 바꾸고, 공격 입력이 가장 가까운 생존 대상을 선택한다. 사거리 안의 대상이 있을 때 풀에서 투사체를 빌려 발사한다. 투사체 이동이 끝난 틱에 피해를 반영하고 슬롯을 반환한다.</p><p>예시 기본 공격력은 80, 방어력은 20이다. 강화가 없고 치명타가 아닌 경우 피해는 60이다. 실제 피해가 남은 HP보다 크면 남은 HP만큼만 적용한다. 시뮬레이션은 30Hz로 동작하며 실제 프로젝트의 틱 빈도를 나타내지 않는다.</p>
+</section>
+<section id="ch02">
+<h2><span class="n">02</span>같은 조건, 같은 결과</h2>
+<p class="sub">두 모델이 입력·데이터·시드로 독립 계산 · <a class="scene" href="index.html#ch02">▶ 이 장면 보기</a></p>
+<p>클라이언트 모델과 서버 모델은 각각 새 상태를 만든 뒤 같은 입력 기록, 데이터, 시드로 전체 시뮬레이션을 독립 실행한다. 같은 틱의 위치·HP·난수 상태·누적 피해를 비교한다. 화면의 식별값은 주요 상태를 요약한 진단용 해시이며 일치만으로 모든 상태의 동일성을 증명하는 보안 검증값은 아니다.</p><p>두 모델은 하나의 브라우저 안에서 실행한다. 실제 서버 접속이나 패킷 동기화를 구현한 영상은 아니다. 이력서의 C++·C# 라이브러리나 Unreal 플러그인을 실행하는 것도 아니며, 동일 조건의 공통 계산이라는 원리를 설명한다. 같은 시드만으로 충분하지 않고 입력 순서·데이터·계산 규칙·난수 호출 순서가 같아야 한다.</p>
+</section>
+<section id="ch03">
+<h2><span class="n">03</span>버프를 게임에 적용</h2>
+<p class="sub">강화 상태가 스탯·피해·화면 효과로 연결 · <a class="scene" href="index.html#ch03">▶ 이 장면 보기</a></p>
+<p>강화 입력은 4초간 공격력 배율 1.5를 적용한다. 강화 상태에서 치명타가 아닌 공격은 공격력 80 × 1.5 − 방어력 20 = 피해 100이 된다. 20% 예시 확률의 치명타는 계산한 피해에 배율 1.5를 적용한다. 영상과 상태 창 모두 같은 실제 계산 결과를 사용한다.</p><p>스탯은 100을 1로 읽는 정수 스케일, 배율은 10,000을 1로 읽는 정수 스케일로 표현하고 연산 단계에서 소수 부분을 버린다. 이는 개념 시연용 규칙이다. 강화 오라는 상태의 남은 시간을 읽어 표시하며, 발사 시 강화 여부가 해당 투사체의 피해를 결정한다.</p>
+</section>
+<section id="ch04">
+<h2><span class="n">04</span>투사체를 다시 사용</h2>
+<p class="sub">발사 → 명중 → 반환 → 다음 발사 · <a class="scene" href="index.html#ch04">▶ 이 장면 보기</a></p>
+<p>투사체 슬롯 6개를 미리 만들고 빈 슬롯을 빌려 쓴다. 발사 시 시작 위치·도착 위치·대상·피해·도착 틱을 채우고, 도착하면 피해를 반영한 뒤 비활성 상태로 반환한다. 슬롯을 다시 쓰면 재사용 횟수가 증가한다. 3D 투사체 메시도 6개를 만들어 슬롯과 연결한다.</p><p>표시하는 슬롯 수·발사 수·재사용 수는 이 데모의 실제 상태다. 풀링이 항상 더 빠르다는 성능 비교나 원래 프로젝트의 FPS 개선 수치를 제시하지 않는다. 이력서에 적힌 Actor·Niagara 풀링의 원리를 별도 구현으로 보여 준다.</p>
+</section>
+<section id="ch05">
+<h2><span class="n">05</span>같은 전투 다시 보기</h2>
+<p class="sub">입력 기록을 재생하고 직접 조작하기 · <a class="scene" href="index.html#ch05">▶ 이 장면 보기</a></p>
+<p>같은 입력 기록을 처음 상태부터 다시 계산하면 동일한 전투 흐름을 볼 수 있다. 데모 페이지의 직접 조작 모드에서는 WASD나 방향키로 이동하고 Space로 공격, E로 강화한다. 초기화하면 시드와 상태가 처음으로 돌아간다.</p><p>새로 만든 교육용 기록 재생 기능이다. 판테라 일반 대전 리플레이를 구현했다는 의미가 아니며 해당 기능은 원본 이력서대로 미구현이다. 게임 수치와 화면 구성은 모두 예시다.</p>
+</section>
+<p class="next">이 영상에 나온 용어는 <a href="terms.html">용어집</a>에 정리했다.</p>
+<footer><a href="https://kosj.github.io/Resume/">이력서로 돌아가기</a></footer>
+</main>
+</body>
+</html>
