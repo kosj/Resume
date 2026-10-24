@@ -3,6 +3,42 @@
   const section = player.closest('[data-video-section]') || player.closest('section');
   const status = section.querySelector('.video-status');
   let pendingTime = null;
+  let hoverPreview = false;
+  let mutedBeforePreview = false;
+  let previewAttempt = 0;
+
+  const stopPreview = () => {
+    if (!hoverPreview) return;
+    hoverPreview = false;
+    previewAttempt++;
+    player.pause();
+    player.muted = mutedBeforePreview;
+  };
+  const takePlaybackControl = () => {
+    if (!hoverPreview) return;
+    hoverPreview = false;
+    previewAttempt++;
+    player.muted = mutedBeforePreview;
+  };
+
+  player.addEventListener('pointerenter', event => {
+    if (event.pointerType !== 'mouse' || !matchMedia('(hover: hover) and (pointer: fine)').matches ||
+        matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        !player.paused || pendingTime !== null) return;
+    mutedBeforePreview = player.muted;
+    hoverPreview = true;
+    player.muted = true;
+    const attempt = ++previewAttempt;
+    player.play().catch(() => {
+      if (attempt === previewAttempt) stopPreview();
+    });
+  });
+  player.addEventListener('pointerleave', stopPreview);
+  player.addEventListener('pointerdown', takePlaybackControl);
+  player.addEventListener('keydown', takePlaybackControl);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopPreview();
+  });
 
   const playChapter = () => {
     if (pendingTime === null || player.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) return;
@@ -41,6 +77,7 @@
     link.addEventListener('click', event => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
+      takePlaybackControl();
       pendingTime = Number(link.dataset.videoTime);
       if (player.readyState >= 1) playChapter();
       else {
