@@ -80,3 +80,13 @@ node tools/motion/render.mjs zenonia-demo/index.html assets/zenonia-path-lockste
 ```
 
 포스터는 FPS 54초, 제노니아 3.4초 프레임의 JPEG이며, 각각 같은 이름의 한국어 VTT 자막을 제공한다. 플레이어별 구간 링크는 `data-video-for`로 분리한다. 인쇄 시 각 데모 주소를 표시한다.
+
+
+## The Last 실제 플레이 영상
+
+`the-last-gameplay.mp4`는 사용자가 제공한 `gameplay_highlights.mp4` 하이라이트 편집본이다.
+실제 플레이 영상이며 별도 기술 시연 데모와 구분해 The Last 항목에 배치한다.
+길이는 약 54초, 1920×1080 H.264/yuv420p, 오디오 트랙은 없다.
+화질 손실 없이 비디오 스트림을 복사하고 MP4 인덱스를 앞에 배치(faststart)했다.
+원본의 개발 빌드 표시와 화면 내용은 보존했다. 포스터는 영상 36초 장면이다.
+자동 재생 없이 `preload="none"`으로 제공하고 인쇄 시 이력서의 해당 위치 링크를 표시한다.
