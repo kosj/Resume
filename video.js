@@ -33,7 +33,6 @@
       if (attempt === previewAttempt) stopPreview();
     });
   });
-  player.addEventListener('pointerleave', stopPreview);
   player.addEventListener('pointerdown', takePlaybackControl);
   player.addEventListener('keydown', takePlaybackControl);
   document.addEventListener('visibilitychange', () => {
