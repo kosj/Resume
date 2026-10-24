@@ -112,3 +112,26 @@ node tools/motion/render.mjs isometric-demo/index.html assets/isometric-view.mp4
 `isometric-view.gif`는 같은 영상의 960×540·12fps·128색 반복 GIF다.
 기본 영상은 클릭 재생하며 GIF는 접힌 ‘GIF로 보기’를 열어 확인한다.
 움직임 감소 설정에서는 GIF 대신 정적 포스터를 표시한다. 인쇄 시에는 설명 링크를 표시한다.
+
+
+## 언리얼 데디케이티드 서버 기술 설명
+
+`dedicated-demo/`는 미니버스 네트워크 경력 옆에 제공하는 별도 교육용 모형이다.
+실제 Unreal 실행·프로젝트 녹화·소켓 통신이 아니다. 중앙 와이어프레임은 렌더링하지 않는 서버 상태를 진단용으로 시각화했다.
+80초·1920×1080·H.264/yuv420p·무음이며 모형 시간을 4배 느리게 표시한다.
+두 클라이언트의 이동·사격·HUD와 권한 서버의 상태를 나란히 비교한다.
+이동 속도 20% 오차를 의도적으로 주입해 ACK 보정·미확인 이동 재실행을 보인다.
+서버 권한 피해, 소유권·쿨다운·탄약·거리 검사, HP RepNotify와 유실 가능한 일회성 FX,
+재접속 초기 상태와 명시적 관심 범위 모형의 프랍 관련성 진입을 계산한다.
+UE의 실제 SavedMove·전송 신뢰성·관련성 스케줄러·Iris/Replication Graph 구현은 재현하지 않는다.
+수치·지연·빈도는 모두 예시이며 경험이나 성능에 대한 추가 주장에 사용하지 않는다.
+기존 `tech-motion-explainer` 스킬과 vendored Three.js·글꼴을 사용했다.
+
+```bash
+node --test tools/test-dedicated.mjs
+node tools/motion/render.mjs dedicated-demo/index.html assets/unreal-dedicated-server.mp4 --fps 16 --crf 23
+node tools/motion/build-articles.mjs --site https://kosj.github.io/Resume/
+```
+
+동일 이름의 JPEG 포스터와 6개 장의 한국어 VTT 자막을 제공한다.
+자동 재생 없이 클릭 재생하며 장별 이동, 별도 장면 플레이어·설명·용어집과 인쇄 링크를 제공한다.
