@@ -2,10 +2,12 @@
 
 관리자 화면은 `/Resume/admin/`에 있으며 GitHub Pages가 정적으로 제공합니다.
 실제 방문 기록은 별도의 Cloudflare Worker가 수집하고 D1에 저장합니다.
-현재 `analytics/config.mjs`의 `API_BASE`는 비어 있으므로 실제 데이터 수집은 꺼져 있습니다.
+운영 `API_BASE`는 `https://resume-analytics.godkosj.workers.dev`이며 APAC D1에 연결되어 있습니다.
+관리자 키와 세션 해시 키는 Cloudflare Worker secret에 설정되어 있습니다.
+관리자 페이지의 API 주소는 자동으로 채워지며 관리자 키로 인증해 조회합니다.
 연결 전 관리자 화면의 ‘예시 데이터’는 명시적으로 생성한 샘플이며 방문 기록이 아닙니다.
 
-## 계정에서 최초 배포
+## 다른 계정에서 최초 배포
 
 Node.js 22 이상이 설치된 컴퓨터에서 저장소를 받은 뒤 실행합니다.
 Cloudflare의 Workers·D1 사용 권한이 있는 계정이 필요합니다.
@@ -16,7 +18,7 @@ npx wrangler@4 login
 npx wrangler@4 d1 create resume-analytics
 ```
 
-반환된 `database_id`를 `backend/wrangler.toml`의 `REPLACE_WITH_D1_DATABASE_ID` 대신 넣습니다.
+반환된 `database_id`를 `backend/wrangler.toml`의 `database_id`에 넣습니다. 운영 DB ID를 다른 계정 배포에 재사용하지 마세요.
 D1 ID와 API URL은 공개 설정이며 비밀 키가 아닙니다.
 
 ```bash

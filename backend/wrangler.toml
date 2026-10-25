@@ -10,8 +10,8 @@ BASE_PATH = "/Resume/"
 [[d1_databases]]
 binding = "DB"
 database_name = "resume-analytics"
-# Replace with the database ID returned by `wrangler d1 create resume-analytics`.
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+# Production D1 database (identifier only; not a credential).
+database_id = "20bff3db-1d73-4f8d-ae0a-09611f9612e7"
 migrations_dir = "migrations"
 
 [triggers]

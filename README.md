@@ -27,8 +27,9 @@ GitHub Pages 게시 소스는 `main` 브랜치의 루트(`/`)입니다.
 
 `admin/`에 기간·유입 유형별 방문 분석, CSV 내보내기와 UTM 링크 생성기를 제공합니다.
 Cloudflare Workers + D1용 수집·인증 조회 API는 `backend/`에 있습니다.
-초기 `analytics/config.mjs`의 API 주소는 비어 있으므로 실제 수집은 비활성 상태입니다.
-`admin/setup.html`과 [Cloudflare 연결 안내](backend/README.md)에 따라 계정에 배포한 뒤 API 주소를 설정합니다.
+`analytics/config.mjs`는 운영 API `https://resume-analytics.godkosj.workers.dev`에 연결되어 있습니다.
+관리자 페이지에서 관리자 키로 로그인하면 연결 이후의 실제 데이터를 조회합니다.
+운영 구성과 다른 계정에 설치하는 방법은 `admin/setup.html`과 [Cloudflare 연결 안내](backend/README.md)에 정리했습니다.
 관리자 키와 세션 해시 키는 Worker secret에만 저장하고 공개 저장소에 넣지 않습니다.
 데이터는 90일 보관하며 원본 IP·전체 URL·User-Agent는 분석 DB에 보관하지 않습니다.
 수집 방식과 참여 선택은 `privacy/`에서 안내합니다.
