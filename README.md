@@ -21,3 +21,18 @@ Unreal Engine·Unity 게임 개발 경력과 주요 프로젝트를 정리한 Gi
 3D 데모는 ES 모듈을 사용하므로 HTTP 서버에서 실행합니다. 저장소 루트에서 `python3 tools/serve.py`를 실행한 뒤 `/demo/index.html` 경로를 엽니다. 이 서버는 영상 구간 이동에 필요한 HTTP 바이트 범위를 지원하며 기본 포트는 8000입니다(`--port`로 변경). WASD·방향키 이동, Space 공격, E 강화, R 초기화를 지원합니다.
 
 GitHub Pages 게시 소스는 `main` 브랜치의 루트(`/`)입니다.
+
+
+## 방문 분석 관리자
+
+`admin/`에 기간·유입 유형별 방문 분석, CSV 내보내기와 UTM 링크 생성기를 제공합니다.
+Cloudflare Workers + D1용 수집·인증 조회 API는 `backend/`에 있습니다.
+초기 `analytics/config.mjs`의 API 주소는 비어 있으므로 실제 수집은 비활성 상태입니다.
+`admin/setup.html`과 [Cloudflare 연결 안내](backend/README.md)에 따라 계정에 배포한 뒤 API 주소를 설정합니다.
+관리자 키와 세션 해시 키는 Worker secret에만 저장하고 공개 저장소에 넣지 않습니다.
+데이터는 90일 보관하며 원본 IP·전체 URL·User-Agent는 분석 DB에 보관하지 않습니다.
+수집 방식과 참여 선택은 `privacy/`에서 안내합니다.
+
+```bash
+node --test tools/test-analytics.mjs
+```

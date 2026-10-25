@@ -1,0 +1,22 @@
+name = "resume-analytics"
+main = "worker.mjs"
+compatibility_date = "2026-10-25"
+workers_dev = true
+
+[vars]
+SITE_ORIGIN = "https://kosj.github.io"
+BASE_PATH = "/Resume/"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "resume-analytics"
+# Replace with the database ID returned by `wrangler d1 create resume-analytics`.
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
+[triggers]
+crons = ["17 18 * * *"]
+
+# Keep telemetry payloads / administrator headers out of Worker invocation logs.
+[observability]
+enabled = false

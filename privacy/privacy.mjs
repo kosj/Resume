@@ -1,0 +1,3 @@
+const button=document.getElementById('choice'),status=document.getElementById('choice-status');
+function update(){try{const disabled=localStorage.getItem('resume.analytics.disabled')==='1';button.textContent=disabled?'이 브라우저에서 방문 분석 켜기':'이 브라우저에서 방문 분석 끄기';status.textContent=disabled?'방문 분석을 전송하지 않도록 설정했습니다.':'브라우저의 추적 거부 설정과 이 사이트의 API 연결 상태에 따라 방문 분석이 동작합니다.';}catch{button.disabled=true;status.textContent='브라우저 저장소에 접근할 수 없습니다. 브라우저의 Do Not Track 또는 Global Privacy Control 설정을 사용할 수 있습니다.';}}
+button.onclick=()=>{try{const disabled=localStorage.getItem('resume.analytics.disabled')==='1';localStorage.setItem('resume.analytics.disabled',disabled?'0':'1');sessionStorage.removeItem('resume.analytics.session.v1');}catch{}update();};update();
