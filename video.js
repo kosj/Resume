@@ -1,4 +1,12 @@
 (() => {
+  const players = [...document.querySelectorAll('video[id]')];
+  const pauseOthers = current => {
+    players.forEach(other => {
+      if (other === current) return;
+      other.dispatchEvent(new Event('stop-preview'));
+      if (!other.paused) other.pause();
+    });
+  };
   document.querySelectorAll('video[id]').forEach(player => {
   const section = player.closest('[data-video-section]') || player.closest('section');
   const status = section.querySelector('.video-status');
@@ -33,6 +41,8 @@
       if (attempt === previewAttempt) stopPreview();
     });
   });
+  player.addEventListener('stop-preview', stopPreview);
+  player.addEventListener('ended', stopPreview);
   player.addEventListener('pointerdown', takePlaybackControl);
   player.addEventListener('keydown', takePlaybackControl);
   document.addEventListener('visibilitychange', () => {
@@ -66,6 +76,7 @@
   player.addEventListener('loadeddata', playChapter);
   player.addEventListener('canplay', playChapter);
   player.addEventListener('progress', playChapter);
+  player.addEventListener('play', () => pauseOthers(player));
   player.addEventListener('playing', () => { status.textContent = ''; });
   player.addEventListener('error', () => {
     status.textContent = '영상을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
@@ -77,6 +88,9 @@
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
       takePlaybackControl();
+      for (let parent = player.parentElement; parent; parent = parent.parentElement) {
+        if (parent.tagName === 'DETAILS') parent.open = true;
+      }
       pendingTime = Number(link.dataset.videoTime);
       if (player.readyState >= 1) playChapter();
       else {
